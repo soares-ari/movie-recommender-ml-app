@@ -1,9 +1,19 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import pickle
 
 # Inicializar API
 app = FastAPI(title="Movie Recommender API")
+
+# Configurar CORS para permitir chamadas do React
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Frontend local
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Carregar modelo SVD
 with open("../../data/svd_model.pkl", "rb") as f:
@@ -11,7 +21,14 @@ with open("../../data/svd_model.pkl", "rb") as f:
 
 # Carregar dados dos filmes
 base_path = "../../data/movielens/ml-100k/"
-movies = pd.read_csv(base_path + "u.item", sep="|", encoding="latin-1", header=None, usecols=[0, 1], names=["movie_id", "title"])
+movies = pd.read_csv(
+    base_path + "u.item",
+    sep="|",
+    encoding="latin-1",
+    header=None,
+    usecols=[0, 1],
+    names=["movie_id", "title"]
+)
 
 # Função de recomendação
 def get_recommendations(user_id, top_n=5):
